@@ -1,0 +1,22 @@
+# Input from the user
+text = input("Enter the message: ")
+k = int(input("Enter shift (1-25): "))
+
+# Check if k is valid
+if k < 1 or k > 25:
+    print("Shift must be between 1 and 25.")
+else:
+    encrypted = ""
+
+    for char in text:
+        if char.isalpha():
+            if char.isupper():
+                # Shift uppercase letters
+                encrypted += chr((ord(char) - ord('A') + k) % 26 + ord('A'))
+            else:
+                # Shift lowercase letters
+                encrypted += chr((ord(char) - ord('a') + k) % 26 + ord('a'))
+        else:
+            # Non-alphabetic characters stay the same
+            encrypted += char
+    print("Encrypted message:", encrypted)
