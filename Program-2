@@ -1,0 +1,19 @@
+import string
+
+# Define the plaintext and ciphertext alphabets
+plaintext_alphabet = string.ascii_lowercase
+ciphertext_alphabet = "QWERTYUIOPASDFGHJKLZXCVBNM".lower()  # Custom mapping
+
+# Input message
+message = input("Enter the message: ").lower()
+
+# Encrypt the message
+encrypted = ""
+for char in message:
+    if char.isalpha():
+        index = plaintext_alphabet.index(char)
+        encrypted += ciphertext_alphabet[index]
+    else:
+        encrypted += char  # Keep spaces and punctuation
+
+print("Encrypted message:", encrypted)
