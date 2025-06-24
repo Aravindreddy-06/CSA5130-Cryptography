@@ -1,0 +1,25 @@
+plaintext = input("Enter the plaintext: ").upper()
+a = int(input("Enter value for a (must be coprime with 26): "))
+b = int(input("Enter value for b: "))
+
+# Check if a is valid (must be coprime with 26)
+x = a
+y = 26
+while y != 0:
+    temp = y
+    y = x % y
+    x = temp
+
+if x != 1:
+    print("Invalid 'a'. It must be coprime with 26.")
+else:
+    ciphertext = ""
+    for i in range(len(plaintext)):
+        ch = plaintext[i]
+        if ch.isalpha():
+            p = ord(ch) - ord('A')
+            c = (a * p + b) % 26
+            ciphertext += chr(c + ord('A'))
+        else:
+            ciphertext += ch
+    print("Encrypted text:", ciphertext)
