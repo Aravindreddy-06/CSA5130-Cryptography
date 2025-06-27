@@ -1,0 +1,37 @@
+# Letter frequency in English (from most common to least)
+english_freq_order = "etaoinshrdlcumwfgypbvkjxqz"
+
+# Input: ciphertext
+ciphertext = input("Enter the ciphertext: ").lower()
+top_n = int(input("How many top results do you want to see? "))
+
+# Remove non-alphabetic characters and store original for display
+clean_text = ""
+for ch in ciphertext:
+    if ch.isalpha():
+        clean_text += ch
+
+# Try all 26 Caesar shifts and score each
+results = []
+for shift in range(26):
+    decrypted = ""
+    for i in range(len(clean_text)):
+        c = ord(clean_text[i]) - ord('a')
+        p = (c - shift) % 26
+        decrypted += chr(p + ord('a'))
+    
+    # Score the decrypted text based on frequency
+    score = 0
+    for ch in decrypted:
+        score += 26 - english_freq_order.find(ch) if ch in english_freq_order else 0
+    
+    results.append((score, shift, decrypted))
+
+# Sort results by score (higher is better)
+results.sort(reverse=True)
+
+# Print top N results
+print(f"\nTop {top_n} possible plaintexts:\n")
+for i in range(top_n):
+    score, shift, text = results[i]
+    print(f"{i+1}. Shift = {shift:2} | Score = {score:3} | Plaintext: {text}")
