@@ -1,0 +1,23 @@
+ciphertext = """
+KXJEY UREBE ZWEHE WRYTU HEYFS
+KREHE GOYFI WTTTU OLKSY CAJPO
+BOTEI ZONTX BYBNT GONEY CUZWR
+GDSON SXBOU YWRHE BAAHY USEDQ
+"""
+
+# Matrix to use (standard Playfair)
+matrix = [
+    ["P", "L", "A", "Y", "F"],
+    ["I", "R", "E", "X", "M"],
+    ["B", "C", "D", "G", "H"],
+    ["K", "N", "O", "Q", "S"],
+    ["T", "U", "V", "W", "Z"]
+]
+
+# Manual decryption step-by-step is needed here
+# For simplicity, we just format input:
+cleaned = ciphertext.replace("\n", " ").replace(" ", "")
+print("Ciphertext prepared as digraphs:")
+for i in range(0, len(cleaned), 2):
+    print(cleaned[i] + cleaned[i+1], end=' ')
+print()
