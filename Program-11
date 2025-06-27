@@ -1,0 +1,16 @@
+import math
+
+# Step 1: Calculate log2(25!) to avoid overflow
+log2_factorial = 0
+for i in range(1, 26):
+    log2_factorial += math.log2(i)
+
+print("Approximate number of Playfair keys (ignoring duplicates): 2^", round(log2_factorial))
+
+# Step 2: Estimate reduction due to duplicate keys
+# Common assumption: 8 equivalent arrangements (rotations, reflections, digraph swaps)
+duplicate_reduction = math.log2(8)  # = 3
+
+unique_keys_log2 = log2_factorial - duplicate_reduction
+
+print("Estimated number of effectively unique Playfair keys: 2^", round(unique_keys_log2))
