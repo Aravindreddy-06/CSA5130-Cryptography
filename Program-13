@@ -1,0 +1,42 @@
+import numpy as np
+
+# Step 1: Choose plaintext matrix P with invertible determinant mod 26
+P = np.array([[1, 2],    # "bc"
+              [0, 3]])   # "ad"
+# Example: "bc" = [1,2], "ad" = [0,3]
+
+# Step 2: Assume known ciphertext matrix C
+C = np.array([[5, 7],    # "fh" = [5,7]
+              [4, 6]])   # "eg" = [4,6]
+
+# Step 3: Solve for key matrix K using C = K × P → K = C × P⁻¹ mod 26
+
+# Compute determinant of P
+det = (P[0][0]*P[1][1] - P[0][1]*P[1][0]) % 26
+
+# Find modular inverse of determinant
+det_inv = None
+for i in range(1, 26):
+    if (det * i) % 26 == 1:
+        det_inv = i
+        break
+
+if det_inv is None:
+    raise ValueError("Determinant is not invertible modulo 26. Choose a different plaintext matrix.")
+
+# Compute adjugate (adjoint) of P
+adj = np.array([[P[1][1], -P[0][1]],
+                [-P[1][0], P[0][0]]])
+
+# Compute inverse of P mod 26
+P_inv = (det_inv * adj) % 26
+P_inv = P_inv.astype(int)
+
+# Multiply C × P⁻¹ mod 26 to get key matrix K
+K = np.dot(C, P_inv) % 26
+K = K.astype(int)
+
+# Display results
+print("Chosen plaintext matrix (P):\n", P)
+print("\nCorresponding ciphertext matrix (C):\n", C)
+print("\nRecovered key matrix (K = C × P⁻¹ mod 26):\n", K)
