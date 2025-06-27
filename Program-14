@@ -1,0 +1,34 @@
+# Input plaintext and key stream
+plaintext = "send more money"
+plaintext = plaintext.replace(" ", "").lower()
+
+key_stream = [9, 0, 1, 7, 23, 15, 21, 14, 11, 11, 2, 8, 9]
+
+# Encrypt the plaintext using the key stream
+ciphertext = ""
+print("Encryption:")
+for i in range(len(plaintext)):
+    p = ord(plaintext[i]) - ord('a')
+    k = key_stream[i]
+    c = (p + k) % 26
+    print(f"{plaintext[i]}({p}) + {k} = {c} -> {chr(c + ord('a'))}")
+    ciphertext += chr(c + ord('a'))
+
+print("\nCiphertext:", ciphertext)
+
+
+# Input ciphertext and target plaintext
+ciphertext = "beokjdmsxzpmh"
+target_plaintext = "cashnotneeded"
+
+# Calculate the required key stream
+key_stream = []
+print("Decryption Key Calculation:")
+for i in range(len(ciphertext)):
+    c = ord(ciphertext[i]) - ord('a')
+    p = ord(target_plaintext[i]) - ord('a')
+    k = (c - p) % 26
+    print(f"{ciphertext[i]}({c}) - {target_plaintext[i]}({p}) = {k}")
+    key_stream.append(k)
+
+print("\nRecovered key stream:", key_stream)
