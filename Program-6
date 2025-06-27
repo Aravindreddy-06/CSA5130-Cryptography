@@ -1,0 +1,38 @@
+# Affine Cipher cracker (assume B→E and U→T)
+from collections import Counter
+
+ciphertext = input("Enter ciphertext: ").upper()
+
+# Possible mappings based on assumptions
+# E = (a * P + b) % 26 → B (1), T → U (20)
+# Let's solve equations:
+# (a * E + b) % 26 = 1   and   (a * T + b) % 26 = 20
+# E = 4, T = 19
+# Solve system:
+# (4a + b) % 26 = 1
+# (19a + b) % 26 = 20
+# Subtract: 15a % 26 = 19
+
+# Try all values of a (must be coprime with 26)
+for a in range(1, 26, 2):  # Only odd numbers
+    if a in [13]: continue
+    if (15 * a) % 26 == 19:
+        # Found valid a
+        b = (1 - 4 * a) % 26
+        print("Possible a:", a, "b:", b)
+        # Decrypt
+        m = 0
+        for x in range(1, 26):
+            if (a * x) % 26 == 1:
+                m = x  # modular inverse
+                break
+
+        plaintext = ""
+        for ch in ciphertext:
+            if ch.isalpha():
+                y = ord(ch) - ord('A')
+                p = (m * (y - b)) % 26
+                plaintext += chr(p + ord('A'))
+            else:
+                plaintext += ch
+        print("Decrypted message:", plaintext)
