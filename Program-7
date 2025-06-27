@@ -1,0 +1,45 @@
+ciphertext = "53‡‡†305))6*;4826)4‡.)4‡);806*;48†8¶60))85;;]8*;:‡*8†83(88)5*†;46(;88*96*?;8)*‡(;485);5*†2:*‡(;4956*2(5*—4)8¶8*;4069285);)6†8)4‡‡;1(‡9;48081;8:8‡1;48†85;4)485†528806*81(‡9;48;(88;4(‡?34;48)4‡;161;:188;‡?"
+
+# Count frequency
+freq = {}
+for ch in ciphertext:
+    if ch in freq:
+        freq[ch] += 1
+    else:
+        freq[ch] = 1
+
+sorted_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)
+
+print("Character frequency in ciphertext:")
+for ch, f in sorted_freq:
+    print(f"{ch}: {f}")
+
+# Based on most frequent, try manual substitution
+# Guessing: ‡ → E, ; → T, * → H, etc.
+# You would replace characters based on this guess
+
+decoded = ciphertext
+decoded = decoded.replace("‡", "E")
+decoded = decoded.replace(";", "T")
+decoded = decoded.replace("*", "H")
+decoded = decoded.replace(")", "S")
+decoded = decoded.replace("(", "O")
+decoded = decoded.replace("†", "N")
+decoded = decoded.replace("8", "A")
+decoded = decoded.replace("4", "R")
+decoded = decoded.replace("5", "D")
+decoded = decoded.replace("6", "L")
+decoded = decoded.replace("0", "M")
+decoded = decoded.replace(":", "Y")
+decoded = decoded.replace(".", "G")
+decoded = decoded.replace("3", "C")
+decoded = decoded.replace("2", "U")
+decoded = decoded.replace("1", "B")
+decoded = decoded.replace("9", "I")
+decoded = decoded.replace("—", "F")
+decoded = decoded.replace("¶", "W")
+decoded = decoded.replace("?", "P")
+decoded = decoded.replace("]", "K")
+
+print("\nPartially Decoded Message:")
+print(decoded)
