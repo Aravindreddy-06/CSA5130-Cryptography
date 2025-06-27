@@ -1,0 +1,56 @@
+import itertools
+
+# Step 1: Input ciphertext and number of top guesses
+ciphertext = input("Enter the ciphertext: ").lower()
+top_n = int(input("How many top results do you want to see? "))
+
+# Step 2: English letter frequency (most to least)
+english_freq = "etaoinshrdlcumwfgypbvkjxqz"
+
+# Step 3: Count frequency of each letter in ciphertext
+freq_count = {}
+for ch in ciphertext:
+    if ch.isalpha():
+        if ch in freq_count:
+            freq_count[ch] += 1
+        else:
+            freq_count[ch] = 1
+
+# Step 4: Sort ciphertext letters by frequency
+cipher_letters_sorted = sorted(freq_count, key=freq_count.get, reverse=True)
+
+# Step 5: Create partial substitution maps using top frequent letters
+mapping_results = []
+tries = 0
+
+# Try top 6 letters mapped to top 6 English letters (720 permutations)
+for perm in itertools.permutations(english_freq[:6]):
+    map_dict = {}
+    for i in range(min(len(cipher_letters_sorted), 6)):
+        map_dict[cipher_letters_sorted[i]] = perm[i]
+
+    # Decrypt based on this mapping
+    plaintext = ""
+    for ch in ciphertext:
+        if ch.isalpha():
+            if ch in map_dict:
+                plaintext += map_dict[ch]
+            else:
+                plaintext += ch
+        else:
+            plaintext += ch
+
+    # Scoring based on number of high-frequency English letters matched
+    score = 0
+    for ch in plaintext:
+        if ch in english_freq[:6]:
+            score += 1
+
+    mapping_results.append((score, plaintext))
+    tries += 1
+
+# Step 6: Sort and display top N results
+mapping_results.sort(reverse=True)
+print(f"\nTop {top_n} likely plaintexts from {tries} attempts:\n")
+for i in range(top_n):
+    print(f"{i+1}. Score: {mapping_results[i][0]:3} | Plaintext: {mapping_results[i][1]}")
