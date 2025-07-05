@@ -1,0 +1,22 @@
+import random
+import string
+
+# Input plaintext (only letters)
+plaintext = input("Enter the plaintext (only letters): ").upper().replace(" ", "")
+
+# Generate key stream of same length, values between 0 and 26
+key_stream = [random.randint(0, 26) for _ in range(len(plaintext))]
+
+# Encrypt the plaintext
+ciphertext = ""
+for i in range(len(plaintext)):
+    if plaintext[i].isalpha():
+        p = ord(plaintext[i]) - ord('A')
+        k = key_stream[i]
+        c = (p + k) % 26
+        ciphertext += chr(c + ord('A'))
+
+# Print results
+print("\nPlaintext:", plaintext)
+print("Key stream:", key_stream)
+print("Ciphertext:", ciphertext)
