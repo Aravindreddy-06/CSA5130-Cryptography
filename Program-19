@@ -1,0 +1,27 @@
+#pip install pycryptodome
+
+
+from Crypto.Cipher import DES3
+from Crypto.Util.Padding import pad
+from Crypto.Random import get_random_bytes
+
+# Step 1: Define the plaintext
+plaintext = b"This is a secret message that needs to be encrypted using CBC and 3DES."
+
+# Step 2: Generate a 24-byte (192-bit) 3DES key
+key = DES3.adjust_key_parity(get_random_bytes(24))
+
+# Step 3: Generate a random 8-byte IV (DES block size is 64 bits = 8 bytes)
+iv = get_random_bytes(8)
+
+# Step 4: Create CBC mode cipher object
+cipher = DES3.new(key, DES3.MODE_CBC, iv)
+
+# Step 5: Pad plaintext and encrypt
+padded_text = pad(plaintext, DES3.block_size)
+ciphertext = cipher.encrypt(padded_text)
+
+# Step 6: Display results
+print("Key (hex):", key.hex())
+print("IV  (hex):", iv.hex())
+print("Ciphertext (hex):", ciphertext.hex())
