@@ -1,0 +1,55 @@
+from Crypto.Cipher import DES
+from Crypto.Random import get_random_bytes
+
+def pad_message(msg, block_size):
+    # Add a single '1' bit followed by as many '0's as needed
+    # Represented as bytes: 0x80 followed by 0x00 padding
+    padding_len = block_size - (len(msg) % block_size)
+    if padding_len == 0:
+        padding_len = block_size
+    padding = b'\x80' + b'\x00' * (padding_len - 1)
+    return msg + padding
+
+def unpad_message(padded):
+    # Remove padding: look for first 0x80 from the end
+    index = padded.rfind(b'\x80')
+    return padded[:index]
+
+# Block cipher setup
+key = get_random_bytes(8)  # DES key: 8 bytes
+iv = get_random_bytes(8)   # IV for CBC/CFB modes
+plaintext = b"HELLO WORLD"  # Any plaintext
+block_size = 8  # DES block size
+
+# Pad the plaintext
+padded = pad_message(plaintext, block_size)
+print("Original:", plaintext)
+print("Padded:", padded)
+
+# ECB Mode
+ecb_cipher = DES.new(key, DES.MODE_ECB)
+ecb_encrypted = ecb_cipher.encrypt(padded)
+ecb_decrypted = unpad_message(ecb_cipher.decrypt(ecb_encrypted))
+
+# CBC Mode
+cbc_cipher = DES.new(key, DES.MODE_CBC, iv)
+cbc_encrypted = cbc_cipher.encrypt(padded)
+cbc_decrypted = unpad_message(DES.new(key, DES.MODE_CBC, iv).decrypt(cbc_encrypted))
+
+# CFB Mode
+cfb_cipher = DES.new(key, DES.MODE_CFB, iv, segment_size=64)
+cfb_encrypted = cfb_cipher.encrypt(padded)
+cfb_decrypted = unpad_message(DES.new(key, DES.MODE_CFB, iv, segment_size=64).decrypt(cfb_encrypted))
+
+# Print results
+print("\n--- ECB ---")
+print("Encrypted:", ecb_encrypted.hex())
+print("Decrypted:", ecb_decrypted)
+
+print("\n--- CBC ---")
+print("Encrypted:", cbc_encrypted.hex())
+print("Decrypted:", cbc_decrypted)
+
+print("\n--- CFB ---")
+print("Encrypted:", cfb_encrypted.hex())
+print("Decrypted:", cfb_decrypted)
