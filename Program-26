@@ -1,0 +1,36 @@
+# Leaked RSA key setup
+e_old = 31
+d_old = 3371
+n = 3599  # This is 59 × 61
+
+# Attacker knows d_old and e_old
+phi_n = (e_old * d_old - 1)
+
+# Try finding p and q by factoring n
+def find_factors(n):
+    for i in range(2, n):
+        if n % i == 0:
+            return i, n // i
+    return None, None
+
+# Bob changes only e, keeps n
+e_new = 17
+
+# Attacker can still factor n since phi(n) is known
+p, q = find_factors(n)
+print(f"Attacker factors n: p = {p}, q = {q}")
+
+# Compute new d
+phi = (p - 1) * (q - 1)
+def extended_gcd(a, b):
+    if b == 0:
+        return a, 1, 0
+    g, x1, y1 = extended_gcd(b, a % b)
+    return g, y1, x1 - (a // b) * y1
+
+_, x, _ = extended_gcd(e_new, phi)
+d_new = x % phi
+print(f"Bob's new public key: (e = {e_new}, n = {n})")
+print(f"Bob's new private key: (d = {d_new}, n = {n})")
+
+print("\n⚠️ This new key is still insecure because the attacker already knows φ(n) and can compute any new d.")
