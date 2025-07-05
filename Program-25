@@ -1,0 +1,37 @@
+import math
+
+# Given RSA modulus (n = p * q) and public key exponent
+n = 3599  # suppose
+e = 31    # public exponent
+
+# Suppose we're told that a plaintext block 'm' shares a common factor with n
+m = 59    # Let's assume m = p (which divides n)
+
+# Step 1: Find gcd(m, n)
+g = math.gcd(m, n)
+
+# Step 2: Check if it's a non-trivial factor
+if 1 < g < n:
+    print(f"Non-trivial factor found! gcd({m}, {n}) = {g}")
+    p = g
+    q = n // g
+    print(f"Other factor is: {q}")
+    
+    # Step 3: Compute phi(n)
+    phi = (p - 1) * (q - 1)
+    
+    # Step 4: Compute private key using Extended Euclidean Algorithm
+    def extended_gcd(a, b):
+        if b == 0:
+            return a, 1, 0
+        gcd, x1, y1 = extended_gcd(b, a % b)
+        x = y1
+        y = x1 - (a // b) * y1
+        return gcd, x, y
+    
+    _, x, _ = extended_gcd(e, phi)
+    d = x % phi
+    
+    print(f"Private key (d): {d}")
+else:
+    print("No useful factor found.")
