@@ -1,0 +1,37 @@
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+from Crypto.Random import get_random_bytes
+
+# CBC-MAC with AES, block size = 16 bytes
+BLOCK_SIZE = 16
+
+# Helper: CBC-MAC
+def cbc_mac(key, message):
+    cipher = AES.new(key, AES.MODE_ECB)
+    blocks = [message[i:i+BLOCK_SIZE] for i in range(0, len(message), BLOCK_SIZE)]
+    prev = bytes(BLOCK_SIZE)  # IV = 0
+    for block in blocks:
+        prev = cipher.encrypt(bytes(a ^ b for a, b in zip(prev, block)))
+    return prev  # last ciphertext block = MAC
+
+# Generate key and one-block message X
+key = get_random_bytes(16)
+X = get_random_bytes(16)
+
+# Step 1: Compute T = MAC(K, X)
+T = cbc_mac(key, X)
+
+# Step 2: Compute forged 2-block message: X || (X ⊕ T)
+X_xor_T = bytes(a ^ b for a, b in zip(X, T))
+forged_message = X + X_xor_T
+
+# Step 3: Compute MAC of forged message
+T_forged = cbc_mac(key, forged_message)
+
+print("Original message (X):", X.hex())
+print("MAC of X (T):", T.hex())
+print("Forged message (X || X⊕T):", forged_message.hex())
+print("MAC of forged message:", T_forged.hex())
+
+# Verify if MAC is same
+print("\n✅ Forgery successful?" , T == T_forged)
