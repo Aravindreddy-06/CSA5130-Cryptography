@@ -1,0 +1,32 @@
+import random
+
+# SHA-3 state: 25 lanes of 64 bits each
+total_lanes = 25
+rate_lanes = 1024 // 64  # 16 lanes used by each block
+capacity_lanes = list(range(rate_lanes, total_lanes))  # Lanes 16 to 24
+
+# Initialize state: all 0
+state = [0] * total_lanes
+block_count = 0
+
+# We track whether each capacity lane has become non-zero
+filled_capacity_lanes = set()
+
+while len(filled_capacity_lanes) < len(capacity_lanes):
+    block_count += 1
+    # Simulate a message block: fill the first 16 lanes with random 64-bit values
+    message_block = [random.getrandbits(64) for _ in range(rate_lanes)]
+    
+    # XOR the message into the state (ignoring permutation)
+    for i in range(rate_lanes):
+        state[i] ^= message_block[i]
+
+    # Randomly let the message affect capacity lanes indirectly (simulate leakage)
+    for i in capacity_lanes:
+        # 10% chance a lane gets some bits indirectly
+        if random.random() < 0.1:
+            state[i] ^= random.getrandbits(64)
+            if state[i] != 0:
+                filled_capacity_lanes.add(i)
+
+print("Blocks needed to affect all capacity lanes:", block_count)
