@@ -1,0 +1,30 @@
+# Affine Caesar Cipher Implementation
+
+# Input parameters
+a = 5
+b = 8
+plaintext = "HELLO"
+
+# Convert to lowercase and remove non-alphabetic characters
+plaintext = plaintext.lower()
+plaintext = ''.join([c for c in plaintext if c.isalpha()])
+
+# Encryption
+ciphertext = ""
+for p in plaintext:
+    p_num = ord(p) - ord('a')
+    c_num = (a * p_num + b) % 26
+    c = chr(c_num + ord('a'))
+    ciphertext += c
+
+print("Plaintext:", plaintext)
+print("Ciphertext:", ciphertext)
+
+# Check if 'a' is valid (must be coprime with 26)
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+
+if gcd(a, 26) != 1:
+    print(f"Warning: a={a} is not valid for affine cipher as it's not coprime with 26")
