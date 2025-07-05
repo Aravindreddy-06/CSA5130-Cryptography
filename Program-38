@@ -1,0 +1,48 @@
+# Hill Cipher Known Plaintext Attack
+
+import numpy as np
+
+# Known plaintext-ciphertext pairs
+plaintexts = ["hello", "world"]
+ciphertexts = ["ZKHND", "QPFVX"]
+
+# Convert to uppercase and remove non-alphabetic characters
+plaintexts = [''.join([c.upper() for c in p if c.isalpha()]) for p in plaintexts]
+ciphertexts = [''.join([c.upper() for c in p if c.isalpha()]) for p in ciphertexts]
+
+# We need at least m^2 characters where m is the key matrix size
+m = 2  # assuming 2x2 key matrix
+
+# Create matrices from the plaintext and ciphertext
+P = []
+C = []
+for i in range(len(plaintexts)):
+    p = plaintexts[i]
+    c = ciphertexts[i]
+    for j in range(0, len(p) - m + 1, m):
+        if j + m > len(p) or j + m > len(c):
+            continue
+        p_block = [ord(ch) - ord('A') for ch in p[j:j+m]]
+        c_block = [ord(ch) - ord('A') for ch in c[j:j+m]]
+        P.append(p_block)
+        C.append(c_block)
+
+# Convert to numpy arrays
+P = np.array(P[:m])  # take first m blocks
+C = np.array(C[:m])  # take first m blocks
+
+# Solve for key K: C = P*K mod 26
+try:
+    P_inv = np.linalg.inv(P)
+    det = int(round(np.linalg.det(P)))
+    det_inv = pow(det, -1, 26)
+    P_adj = (P_inv * det * np.linalg.det(P) * np.linalg.inv(P)).astype(int)
+    P_mod_inv = (det_inv * P_adj) % 26
+    
+    K = (P_mod_inv @ C) % 26
+    K = np.round(K).astype(int)
+    
+    print("Recovered key matrix:")
+    print(K)
+except:
+    print("Could not invert plaintext matrix. Need more plaintext-ciphertext pairs.")
