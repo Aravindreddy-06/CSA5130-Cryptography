@@ -1,0 +1,53 @@
+#pip install pycryptodome
+
+
+from Crypto.Cipher import DES3
+from Crypto.Random import get_random_bytes
+
+def custom_pad(data, block_size):
+    # Always add padding, even if already aligned
+    pad_len = block_size - (len(data) % block_size)
+    return data + b'\x80' + b'\x00' * (pad_len - 1)  # 0x80 = binary '10000000'
+
+def custom_unpad(data):
+    if b'\x80' in data:
+        return data[:data.rfind(b'\x80')]
+    return data  # fallback
+
+# Define plaintext
+plaintext = b"This is 24-byte message"  # 24 bytes (3 DES blocks of 8 bytes)
+
+# Manually pad (even though already full block length)
+block_size = 8
+padded_plaintext = custom_pad(plaintext, block_size)
+
+# Generate DES3 key and IV
+key = DES3.adjust_key_parity(get_random_bytes(24))
+iv = get_random_bytes(8)
+
+# ECB Mode
+cipher_ecb = DES3.new(key, DES3.MODE_ECB)
+ct_ecb = cipher_ecb.encrypt(padded_plaintext)
+pt_ecb = custom_unpad(cipher_ecb.decrypt(ct_ecb))
+
+# CBC Mode
+cipher_cbc = DES3.new(key, DES3.MODE_CBC, iv)
+ct_cbc = cipher_cbc.encrypt(padded_plaintext)
+pt_cbc = custom_unpad(DES3.new(key, DES3.MODE_CBC, iv).decrypt(ct_cbc))
+
+# CFB Mode (segment size = block size here for simplicity)
+cipher_cfb = DES3.new(key, DES3.MODE_CFB, iv, segment_size=64)
+ct_cfb = cipher_cfb.encrypt(padded_plaintext)
+pt_cfb = custom_unpad(DES3.new(key, DES3.MODE_CFB, iv, segment_size=64).decrypt(ct_cfb))
+
+# Results
+print("Original Plaintext:", plaintext)
+print("Padded Plaintext (hex):", padded_plaintext.hex())
+print("\nECB Ciphertext:", ct_ecb.hex())
+print("ECB Decrypted :", pt_ecb)
+
+print("\nCBC Ciphertext:", ct_cbc.hex())
+print("CBC Decrypted :", pt_cbc)
+
+print("\nCFB Ciphertext:", ct_cfb.hex())
+print("CFB Decrypted :", pt_cfb)
