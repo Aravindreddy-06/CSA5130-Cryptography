@@ -1,0 +1,96 @@
+# --- S-DES Support Functions (same as in Q22) ---
+P10 = [3, 5, 2, 7, 4, 10, 1, 9, 8, 6]
+P8  = [6, 3, 7, 4, 8, 5, 10, 9]
+IP  = [2, 6, 3, 1, 4, 8, 5, 7]
+IP_inv = [4, 1, 3, 5, 7, 2, 8, 6]
+EP  = [4, 1, 2, 3, 2, 3, 4, 1]
+P4  = [2, 4, 3, 1]
+
+S0 = [[1, 0, 3, 2],[3, 2, 1, 0],[0, 2, 1, 3],[3, 1, 3, 2]]
+S1 = [[0, 1, 2, 3],[2, 0, 1, 3],[3, 0, 1, 0],[2, 1, 0, 3]]
+
+def permute(bits, pattern):
+    return [bits[i - 1] for i in pattern]
+
+def left_shift(bits, n):
+    return bits[n:] + bits[:n]
+
+def xor(a, b):
+    return [i ^ j for i, j in zip(a, b)]
+
+def sbox(bits, box):
+    row = (bits[0] << 1) + bits[3]
+    col = (bits[1] << 1) + bits[2]
+    val = box[row][col]
+    return [val >> 1 & 1, val & 1]
+
+def generate_keys(key):
+    key = permute(key, P10)
+    left, right = key[:5], key[5:]
+    left, right = left_shift(left, 1), left_shift(right, 1)
+    K1 = permute(left + right, P8)
+    left, right = left_shift(left, 2), left_shift(right, 2)
+    K2 = permute(left + right, P8)
+    return K1, K2
+
+def sdes_encrypt(plain, K1, K2):
+    bits = permute(plain, IP)
+    bits = fk(bits, K1)
+    bits = bits[4:] + bits[:4]
+    bits = fk(bits, K2)
+    return permute(bits, IP_inv)
+
+def fk(bits, key):
+    left, right = bits[:4], bits[4:]
+    temp = permute(right, EP)
+    temp = xor(temp, key)
+    s0 = sbox(temp[:4], S0)
+    s1 = sbox(temp[4:], S1)
+    return xor(left, permute(s0 + s1, P4)) + right
+
+# --- Utility Functions ---
+def str_to_bits(s):
+    return [int(c) for c in s]
+
+def bits_to_str(bits):
+    return ''.join(str(b) for b in bits)
+
+def int_to_bits(n, width=8):
+    return [int(b) for b in format(n, f'0{width}b')]
+
+def ctr_encrypt(plaintext_blocks, key_bits, counter_start):
+    K1, K2 = generate_keys(key_bits)
+    ciphertext_blocks = []
+    for i, pt in enumerate(plaintext_blocks):
+        counter = int_to_bits(counter_start + i)
+        keystream = sdes_encrypt(counter, K1, K2)
+        cipher = xor(pt, keystream)
+        ciphertext_blocks.append(cipher)
+    return ciphertext_blocks
+
+def ctr_decrypt(cipher_blocks, key_bits, counter_start):
+    # CTR decryption is same as encryption
+    return ctr_encrypt(cipher_blocks, key_bits, counter_start)
+
+# === Test Data ===
+key_bits = str_to_bits("0111111101")
+plaintext_blocks = [
+    str_to_bits("00000001"),
+    str_to_bits("00000010"),
+    str_to_bits("00000100")
+]
+counter_start = 0  # 00000000
+
+# === Encrypt ===
+cipher_blocks = ctr_encrypt(plaintext_blocks, key_bits, counter_start)
+
+print("Ciphertext blocks (CTR mode):")
+for block in cipher_blocks:
+    print(bits_to_str(block))
+
+# === Decrypt ===
+decrypted_blocks = ctr_decrypt(cipher_blocks, key_bits, counter_start)
+
+print("\nDecrypted plaintext blocks:")
+for block in decrypted_blocks:
+    print(bits_to_str(block))
