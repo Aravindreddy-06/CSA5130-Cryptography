@@ -1,0 +1,45 @@
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+
+# Select block size (128 for AES, 64 for DES)
+block_size = 128  # or 64
+block_bytes = block_size // 8
+
+# Constants for Rb
+if block_size == 128:
+    Rb = 0x87
+    cipher = AES.new(get_random_bytes(16), AES.MODE_ECB)
+elif block_size == 64:
+    Rb = 0x1B
+    # For 64-bit CMAC you'd typically use DES or similar (not shown here)
+else:
+    raise ValueError("Unsupported block size.")
+
+# Step 1: Generate L = E_K(0^blocksize)
+zero_block = bytes([0] * block_bytes)
+L = cipher.encrypt(zero_block)
+
+# Step 2: Generate K1
+L_int = int.from_bytes(L, 'big')  # Convert to integer for bit ops
+if (L_int >> (block_size - 1)) & 1 == 0:
+    K1_int = (L_int << 1)
+else:
+    K1_int = (L_int << 1) ^ (Rb << 0)
+
+K1_int &= (1 << block_size) - 1  # Trim to block size
+K1 = K1_int.to_bytes(block_bytes, 'big')
+
+# Step 3: Generate K2 from K1
+if (K1_int >> (block_size - 1)) & 1 == 0:
+    K2_int = (K1_int << 1)
+else:
+    K2_int = (K1_int << 1) ^ (Rb << 0)
+
+K2_int &= (1 << block_size) - 1
+K2 = K2_int.to_bytes(block_bytes, 'big')
+
+# Output results
+print("Block size:", block_size, "bits")
+print("L  =", L.hex())
+print("K1 =", K1.hex())
+print("K2 =", K2.hex())
