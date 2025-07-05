@@ -1,0 +1,21 @@
+# Simulated RSA setup with large e and n (just illustrative here)
+e = 65537
+n = 99991  # In practice, n would be much larger
+
+# Step 1: Build a ciphertext lookup table
+rsa_dict = {}
+for m in range(26):  # A-Z
+    c = pow(m, e, n)
+    rsa_dict[c] = m
+
+# Suppose Alice encrypts "HELLO" as numbers: 7 4 11 11 14
+plaintext = [7, 4, 11, 11, 14]
+ciphertext = [pow(m, e, n) for m in plaintext]
+
+# Step 2: Attacker decrypts using the lookup table
+recovered = [rsa_dict[c] for c in ciphertext]
+letters = [chr(num + ord('A')) for num in recovered]
+
+print("Encrypted:", ciphertext)
+print("Recovered numeric:", recovered)
+print("Recovered text:", ''.join(letters))
