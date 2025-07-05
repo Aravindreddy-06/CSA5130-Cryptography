@@ -1,0 +1,58 @@
+# Letter Frequency Attack on Additive Cipher
+
+# English letter frequencies (percentages)
+english_freq = {
+    'a': 8.2, 'b': 1.5, 'c': 2.8, 'd': 4.3, 'e': 12.7,
+    'f': 2.2, 'g': 2.0, 'h': 6.1, 'i': 7.0, 'j': 0.2,
+    'k': 0.8, 'l': 4.0, 'm': 2.4, 'n': 6.7, 'o': 7.5,
+    'p': 1.9, 'q': 0.1, 'r': 6.0, 's': 6.3, 't': 9.1,
+    'u': 2.8, 'v': 1.0, 'w': 2.4, 'x': 0.2, 'y': 2.0, 'z': 0.1
+}
+
+# Input ciphertext
+ciphertext = "Khoor zruog"
+ciphertext = ciphertext.lower()
+
+# Calculate letter frequencies in ciphertext
+cipher_freq = {}
+total_letters = 0
+for c in ciphertext:
+    if c.isalpha():
+        cipher_freq[c] = cipher_freq.get(c, 0) + 1
+        total_letters += 1
+
+# Normalize frequencies
+for c in cipher_freq:
+    cipher_freq[c] = (cipher_freq[c] / total_letters) * 100
+
+# Find best shift by comparing frequency distributions
+best_shift = 0
+min_diff = float('inf')
+top_shifts = []
+
+for shift in range(26):
+    total_diff = 0
+    for c in cipher_freq:
+        # Decrypt the letter with this shift
+        p = chr(((ord(c) - ord('a') - shift) % 26) + ord('a'))
+        # Compare with English frequency
+        total_diff += abs(cipher_freq[c] - english_freq.get(p, 0))
+    
+    top_shifts.append((total_diff, shift))
+
+# Sort shifts by how close their frequency matches English
+top_shifts.sort()
+
+# Get top 10 possible shifts
+num_suggestions = 10
+print(f"Top {num_suggestions} possible plaintexts:")
+for i in range(min(num_suggestions, 26)):
+    diff, shift = top_shifts[i]
+    decrypted = []
+    for c in ciphertext:
+        if c.isalpha():
+            p = chr(((ord(c) - ord('a') - shift) % 26) + ord('a'))
+            decrypted.append(p)
+        else:
+            decrypted.append(c)
+    print(f"{i+1}. Shift {shift}: {''.join(decrypted)} (diff: {diff:.2f})")
