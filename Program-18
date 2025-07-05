@@ -1,0 +1,32 @@
+# DES standard key shift schedule
+shift_schedule = [1, 1, 2, 2, 2, 2, 2, 2,
+                  1, 2, 2, 2, 2, 2, 2, 1]
+
+# Step 1: 64-bit initial key (as string)
+initial_key = "0001001100110100010101110111100110011011101111001101111111110001"
+
+# Step 2: Remove parity bits (every 8th bit) to get 56-bit key
+key_56 = ""
+for i in range(64):
+    if (i + 1) % 8 != 0:
+        key_56 += initial_key[i]
+
+# Step 3: Split into two disjoint 28-bit halves
+C = key_56[:28]
+D = key_56[28:]
+
+# Step 4: Generate 16 subkeys: first 24 bits from C, next 24 bits from D
+print("DES Subkeys (24 bits from C || 24 bits from D):\n")
+for round_num in range(16):
+    shift = shift_schedule[round_num]
+
+    # Left circular shift
+    C = C[shift:] + C[:shift]
+    D = D[shift:] + D[:shift]
+
+    # Take first 24 bits of each (simulate PC-2 compression)
+    C_part = C[:24]
+    D_part = D[:24]
+    subkey = C_part + D_part
+
+    print(f"K{round_num+1:02}: {subkey}  (C: {C_part}, D: {D_part})")
