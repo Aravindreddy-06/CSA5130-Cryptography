@@ -1,0 +1,48 @@
+#pip install pycryptodome
+
+
+from Crypto.Cipher import DES3
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Random import get_random_bytes
+import copy
+
+# Step 1: Original plaintext and key
+plaintext = b"Block1Block2Block3Block4"
+key = DES3.adjust_key_parity(get_random_bytes(24))
+iv = get_random_bytes(8)
+
+# Step 2: ECB mode encryption
+cipher_ecb = DES3.new(key, DES3.MODE_ECB)
+ciphertext_ecb = cipher_ecb.encrypt(pad(plaintext, DES3.block_size))
+
+# Step 3: CBC mode encryption
+cipher_cbc = DES3.new(key, DES3.MODE_CBC, iv)
+ciphertext_cbc = cipher_cbc.encrypt(pad(plaintext, DES3.block_size))
+
+# Step 4: Introduce error in 1st block of ciphertext
+corrupted_ecb = bytearray(ciphertext_ecb)
+corrupted_cbc = bytearray(ciphertext_cbc)
+
+corrupted_ecb[5] ^= 0xFF  # flip a bit
+corrupted_cbc[5] ^= 0xFF  # flip a bit
+
+# Step 5: Decrypt both corrupted versions
+dec_ecb = DES3.new(key, DES3.MODE_ECB)
+dec_cbc = DES3.new(key, DES3.MODE_CBC, iv)
+
+print("Original Plaintext:")
+print(plaintext)
+
+print("\nECB Decryption with Error:")
+try:
+    decrypted_ecb = unpad(dec_ecb.decrypt(bytes(corrupted_ecb)), DES3.block_size)
+    print(decrypted_ecb)
+except:
+    print("Decryption error (padding or corruption)")
+
+print("\nCBC Decryption with Error:")
+try:
+    decrypted_cbc = unpad(dec_cbc.decrypt(bytes(corrupted_cbc)), DES3.block_size)
+    print(decrypted_cbc)
+except:
+    print("Decryption error (padding or corruption)")
