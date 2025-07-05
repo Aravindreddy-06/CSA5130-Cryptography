@@ -1,0 +1,46 @@
+# Letter Frequency Attack on Monoalphabetic Substitution Cipher (similar to Q37)
+
+# English letter frequencies (from highest to lowest)
+english_freq = [
+    'e', 't', 'a', 'o', 'i', 'n', 's', 'h', 'r', 'd', 'l', 'c', 'u', 'm', 'w', 'f', 'g', 'y', 'p', 'b', 'v', 'k', 'j', 'x', 'q', 'z'
+]
+
+# Input ciphertext
+ciphertext = "Zpezy kp jzple pddpe lxcz esp htes hzxcp xo lxcz esp opgtep htes hzxcp"
+ciphertext = ciphertext.lower()
+
+# Count letter frequencies in ciphertext
+freq = {}
+for c in ciphertext:
+    if c.isalpha():
+        freq[c] = freq.get(c, 0) + 1
+
+# Sort ciphertext letters by frequency (highest first)
+sorted_cipher_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)
+cipher_letters = [item[0] for item in sorted_cipher_freq]
+
+# Generate mappings based on frequency
+num_suggestions = 10
+suggestions = []
+
+for i in range(num_suggestions):
+    mapping = {}
+    for j in range(min(len(cipher_letters), len(english_freq))):
+        mapping[cipher_letters[j]] = english_freq[j]
+    
+    # Decrypt using this mapping
+    decrypted = []
+    for c in ciphertext:
+        if c in mapping:
+            decrypted.append(mapping[c])
+        else:
+            decrypted.append(c)
+    suggestions.append(''.join(decrypted))
+    
+    # Rotate english frequencies for next suggestion
+    english_freq.append(english_freq.pop(0))
+
+# Print top suggestions
+print(f"Top {num_suggestions} possible plaintexts:")
+for i, text in enumerate(suggestions, 1):
+    print(f"{i}. {text}")
