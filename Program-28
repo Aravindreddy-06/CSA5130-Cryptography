@@ -1,0 +1,31 @@
+# Correct Diffie-Hellman Key Exchange
+q = 353      # large prime number
+a = 3        # primitive root mod q
+
+# Secret keys (should be randomly chosen)
+x_A = 97     # Alice's private key
+x_B = 233    # Bob's private key
+
+# Alice and Bob exchange a^x mod q
+A = pow(a, x_A, q)
+B = pow(a, x_B, q)
+
+# Each computes shared key
+K_Alice = pow(B, x_A, q)
+K_Bob = pow(A, x_B, q)
+
+print("Correct DH Exchange:")
+print("Alice computes key:", K_Alice)
+print("Bob computes key:  ", K_Bob)
+
+# Insecure variation: sending x * a mod q
+A_bad = (x_A * a) % q
+B_bad = (x_B * a) % q
+
+# Attacker can multiply both
+Eve_mult = (A_bad * B_bad) % q
+
+print("\nInsecure version (sending x*a mod q):")
+print("Alice sends:", A_bad)
+print("Bob sends:  ", B_bad)
+print("Eve computes (xA * xB * a^2) mod q:", Eve_mult)
