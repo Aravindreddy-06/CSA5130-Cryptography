@@ -1,0 +1,62 @@
+import hashlib
+import random
+
+# Input message
+message = "hello"
+
+# DSA parameters
+p = 101
+q = 23
+g = 2
+x = 5  # DSA private key
+
+# Hash message using SHA-1
+msg_hash = hashlib.sha1(message.encode()).hexdigest()
+H = int(msg_hash, 16)
+
+print("Message:", message)
+print("\nDSA Signatures (Same message, different random k):")
+
+# --- First DSA signature ---
+while True:
+    k1 = random.randint(1, q - 1)
+    r1 = pow(g, k1, p) % q
+    if r1 == 0:
+        continue
+    try:
+        k1_inv = pow(k1, -1, q)
+    except:
+        continue
+    s1 = (k1_inv * (H + x * r1)) % q
+    if s1 != 0:
+        break
+
+print("r1 =", r1, ", s1 =", s1, ", random k1 =", k1)
+
+# --- Second DSA signature ---
+while True:
+    k2 = random.randint(1, q - 1)
+    r2 = pow(g, k2, p) % q
+    if r2 == 0:
+        continue
+    try:
+        k2_inv = pow(k2, -1, q)
+    except:
+        continue
+    s2 = (k2_inv * (H + x * r2)) % q
+    if s2 != 0:
+        break
+
+print("r2 =", r2, ", s2 =", s2, ", random k2 =", k2)
+
+# RSA parameters
+d = 7
+n = 143
+
+# RSA signature (deterministic)
+rsa_sig1 = pow(H, d, n)
+rsa_sig2 = pow(H, d, n)
+
+print("\nRSA Signatures (Same message):")
+print("RSA Signature 1:", rsa_sig1)
+print("RSA Signature 2:", rsa_sig2)
